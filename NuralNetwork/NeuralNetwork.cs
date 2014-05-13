@@ -144,14 +144,11 @@ namespace NuralNetwork
         public void TeachNetwork(IEnumerable<TeachingVector> vectors, double MaxNetworkError)
         {
             var vectorCounts = vectors.Count();
-            foreach (var vector in vectors)
+            double networkError = 0;
+            do
             {
-                double networkError = 0;
-                do
-                {
-                    networkError = TeachNetworkWithVector(vector, vectorCounts);
-                } while (networkError > MaxNetworkError);
-            }
+                networkError = vectors.Average(vector => TeachNetworkWithVector(vector, vectorCounts));
+            } while (networkError > MaxNetworkError);
         }
         private double TeachNetworkWithVector(TeachingVector vector, double teachVectorCount)
         {

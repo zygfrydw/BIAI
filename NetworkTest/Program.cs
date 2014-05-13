@@ -11,10 +11,11 @@ namespace NetworkTest
     {
         static void Main(string[] args)
         {
+            //Sieć rozpoznająca 4 znaki w macierzy 3x3
             var network = new NeuralNetwork(3, 9, 4);
             var teachingVectors = createTeachingVectors();
-            network.TeachNetwork(teachingVectors, 0.1);
-            var query = new double[] {0, 0, 0, 0, 0, 1, 1, 0, 0};
+            network.TeachNetwork(teachingVectors, 0.05);
+            var query = new double[] { 0, 0, 0, 0, 1, 1, 1, 0, 0 };
             var answere = network.CalculateResponse(query);
             for (int i = 0; i < answere.Length; i++)
             {
@@ -26,18 +27,33 @@ namespace NetworkTest
         private static List<TeachingVector> createTeachingVectors()
         {
             var teachingVectors = new List<TeachingVector>();
-            var vector = new TeachingVector();
-            vector.Inputs = new double[] {1, 0, 1, 0, 1, 0, 1, 0, 1};
-            vector.Outputs = new double[] {1, 0, 0, 0};
+            //Znak X
+            var vector = new TeachingVector
+            {
+                Inputs = new double[] {1, 0, 1, 0, 1, 0, 1, 0, 1},
+                Outputs = new double[] {1, 0, 0, 0}
+            };
             teachingVectors.Add(vector);
-            vector.Inputs = new double[] {1, 1, 1, 1, 0, 1, 1, 1, 1};
-            vector.Outputs = new double[] {0, 1, 0, 0};
+            //Znak O
+            vector= new TeachingVector
+            {
+                Inputs = new double[] {1, 1, 1, 1, 0, 1, 1, 1, 1},
+                Outputs = new double[] {0, 1, 0, 0}
+            };
             teachingVectors.Add(vector);
-            vector.Inputs = new double[] {0, 1, 0, 1, 1, 1, 0, 1, 0};
-            vector.Outputs = new double[] {0, 0, 1, 0};
+            //Znak +
+            vector = new TeachingVector
+            {
+                Inputs = new double[] {0, 1, 0, 1, 1, 1, 0, 1, 0},
+                Outputs = new double[] {0, 0, 1, 0}
+            };
             teachingVectors.Add(vector);
-            vector.Inputs = new double[] {0, 0, 0, 1, 1, 1, 0, 0, 0};
-            vector.Outputs = new double[] {0, 0, 0, 1};
+            //Znak -
+            vector = new TeachingVector
+            {
+                Inputs = new double[] {0, 0, 0, 1, 1, 1, 0, 0, 0},
+                Outputs = new double[] {0, 0, 0, 1}
+            };
             teachingVectors.Add(vector);
             return teachingVectors;
         }
