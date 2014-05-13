@@ -33,33 +33,39 @@ namespace NuralNetwork
         private readonly int inputs;
         private readonly int outputs;
         private Layer[]   layers;
-        private int[] layersCardinality;
-        private double beta;
+        
         private int outputLayer;
         private int inputLayer;
-        private double eta;
+        //Wspolczynnik uczenia
+        private double eta; 
+        //Wspołczynnik mementum
         private double alfa;
-
-        public NeuralNetwork(int layersCount, int inputs, int outputs)
+        //Współczynnik stromośvi krzywej
+        private double beta;
+        public NeuralNetwork(int layersCount, int inputs, int outputs, double eta = 0.2, double alfa = 0.6, double beta =1.0)
         {
             this.layersCount = layersCount;
             this.inputs = inputs;
             this.outputs = outputs;
+            this.eta = eta;
+            this.alfa = alfa;
+            this.beta = beta;
+            inputLayer = 0;
+            outputLayer = this.layersCount - 1;
             CreateLayersWithNeurons();
             CreateWeightsTableAndRandomize();
-            outputLayer = this.layersCount - 1;
-            inputLayer = 0;
+            
         }
 
         private void CreateLayersWithNeurons()
         {
             layers = new Layer[layersCount];
-            layers[0].Neurons = new Neuron[inputs];
-            layers[outputLayer].Neurons = new Neuron[outputs];
+            layers[inputLayer] = new Layer {Neurons = new Neuron[inputs]};
+            layers[outputLayer] = new Layer {Neurons = new Neuron[outputs]};
             int cardinality = (int) Math.Ceiling( Math.Sqrt((inputs*outputs)));
             for (int i = 1; i < outputLayer; i++)
             {
-                layers[i].Neurons = new Neuron[cardinality];
+                layers[i] = new Layer {Neurons = new Neuron[cardinality]};
             }
         }
 
@@ -73,9 +79,11 @@ namespace NuralNetwork
             {
                 for (int j = 0; j < layers[i].Neurons.Length; j++)
                 {
+                    layers[i].Neurons[j] = new Neuron();
                     var previousLayerCardinality = layers[i - 1].Neurons.Length;
                     layers[i].Neurons[j].Weights = new double[previousLayerCardinality];
-                    for (int k = 0; k < layersCardinality[i - 1]; k++)
+                    layers[i].Neurons[j].PrevWeights = new double[previousLayerCardinality];
+                    for (int k = 0; k < previousLayerCardinality; k++)
                     {
                         var randNumber = (((rand.Next() % 1000000L) / 1700.0) - 9.8) * 0.0015;
                         if(randNumber == 0)
@@ -90,7 +98,7 @@ namespace NuralNetwork
         {
             for (int j = 0; j < layers[0].Neurons.Length; j++)
             {
-                layers[0].Neurons[j].Weights = new double[1];
+                layers[0].Neurons[j] = new Neuron {Weights = new double[1], PrevWeights = new double[1]};
                 layers[0].Neurons[j].Weights[0] = 1;
             }
         }
@@ -133,11 +141,30 @@ namespace NuralNetwork
             }
         }
 
-        public double TeachNetworkWithVector(TeachingVector vector)
+        public void TeachNetwork(IEnumerable<TeachingVector> vectors, double MaxNetworkError)
+        {
+            var vectorCounts = vectors.Count();
+            foreach (var vector in vectors)
+            {
+                double networkError = 0;
+                do
+                {
+                    networkError = TeachNetworkWithVector(vector, vectorCounts);
+                } while (networkError > MaxNetworkError);
+            }
+        }
+        private double TeachNetworkWithVector(TeachingVector vector, double teachVectorCount)
         {
             var response = CalculateResponse(vector.Inputs);
             CalculateResponseErrorOnOutputs(vector.Outputs, response);
-            for (int i = outputs - 2; i > 0; i--)
+            PropagateErrors();
+            ApplayNewWeights();
+            return CalulateNetworkError(vector.Outputs, teachVectorCount);
+        }
+
+        private void PropagateErrors()
+        {
+            for (int i = layersCount - 2; i >= 0; i--)
             {
                 for (int j = 0; j < layers[i].Neurons.Length; j++)
                 {
@@ -146,21 +173,19 @@ namespace NuralNetwork
                     for (int k = 0; k < layers[i + 1].Neurons.Length; k++)
                     {
                         Neuron outerNeuron = layers[i + 1].Neurons[k];
-                        actualNeuron.Error += actualNeuron.Output*(1.0 - actualNeuron.Output)* outerNeuron.Error * outerNeuron.Weights[j];
+                        actualNeuron.Error += actualNeuron.Output*(1.0 - actualNeuron.Output)*outerNeuron.Error*
+                                              outerNeuron.Weights[j];
                     }
                 }
             }
-            ApplayNewWeights();
-            return CalulateNetworkError();
         }
 
-        private double CalulateNetworkError()
+        private void CalculateResponseErrorOnOutputs(double[] expected, double[] response)
         {
-            double RMS = 0;
-            for (int j = 0; j < n[LW - 1]; j++)
-                RMS += (Wy[wu][j] - O[LW - 1][j]) * (Wy[wu][j] - O[LW - 1][j]);
-            var ERMS = Math.Sqrt(RMS/(double) (ile_wek*n[LW - 1]));
-            return ERMS;
+            for (int i = 0; i < response.Length; i++)
+            {
+                layers[outputLayer].Neurons[i].Error = expected[i] - response[i];
+            }
         }
 
         private void ApplayNewWeights()
@@ -181,14 +206,16 @@ namespace NuralNetwork
             }
         }
 
-        private void CalculateResponseErrorOnOutputs(double[] expected, double[] response)
+        private double CalulateNetworkError(double[] expected, double teachVectorCount)
         {
-            for (int i = 0; i < response.Length; i++)
+            double RMS = 0;
+            for (int j = 0; j < outputs; j++)
             {
-                layers[outputLayer].Neurons[i].Error = expected[i] - response[i];
+                var sqrt = (expected[j] - layers[outputLayer].Neurons[j].Output);
+                RMS += sqrt * sqrt;
             }
+            var ERMS = Math.Sqrt(RMS/(double) (teachVectorCount*outputs));
+            return ERMS;
         }
-
-
     }
 }
