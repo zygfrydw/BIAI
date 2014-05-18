@@ -141,13 +141,17 @@ namespace NuralNetwork
             }
         }
 
-        public void TeachNetwork(IEnumerable<TeachingVector> vectors, double MaxNetworkError)
+        public void TeachNetwork(IEnumerable<TeachingVector> vectors, double MaxNetworkError, ulong maxLoops = 20000)
         {
             var vectorCounts = vectors.Count();
             double networkError = 0;
+            ulong max = 0;
             do
             {
                 networkError = vectors.Average(vector => TeachNetworkWithVector(vector, vectorCounts));
+                max++;
+                if(max > maxLoops)
+                    throw new InvalidOperationException("Error with teaching");
             } while (networkError > MaxNetworkError);
         }
         private double TeachNetworkWithVector(TeachingVector vector, double teachVectorCount)

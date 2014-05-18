@@ -15,8 +15,16 @@ namespace NetworkTest
             var network = new NeuralNetwork(3, 9, 4);
             var teachingVectors = createTeachingVectors();
             network.TeachNetwork(teachingVectors, 0.05);
+            Console.WriteLine("Query 1");
             var query = new double[] { 0, 0, 0, 0, 1, 1, 1, 0, 0 };
             var answere = network.CalculateResponse(query);
+            for (int i = 0; i < answere.Length; i++)
+            {
+                Console.WriteLine("{0}: {1}", i, answere[i]);
+            }
+            Console.WriteLine("Query 2");
+            query = new double[] { 1, 1, 0, 0, 1, 0, 1, 0, 0 };
+            answere = network.CalculateResponse(query);
             for (int i = 0; i < answere.Length; i++)
             {
                 Console.WriteLine("{0}: {1}", i, answere[i]);
