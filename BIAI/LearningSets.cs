@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Media.Imaging;
 using BIAI.Annotations;
 
@@ -81,5 +82,7 @@ namespace BIAI
             var handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        
     }
 }

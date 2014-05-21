@@ -1,16 +1,30 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using BIAI.Annotations;
 
 namespace BIAI
 {
-
     public class NetworkParameters : INotifyPropertyChanged
     {
-        private double networkError;
+        private double actualError;
         private double alpha;
-        private double eta;
         private double beta;
+        private ConversionType conversionType;
+        private double eta;
+        private uint iterations;
+        private ObservableCollection<LearningSet> learningSets;
+        private uint maxIterations;
+        private double networkError;
+
+        public NetworkParameters()
+        {
+            NetworkError = 0.1;
+            Eta = 0.2;
+            Alpha = 0.6;
+            Beta = 1;
+            MaxIterations = 20000;
+        }
 
         public double NetworkError
         {
@@ -56,12 +70,67 @@ namespace BIAI
             }
         }
 
+        public ObservableCollection<LearningSet> LearningSets
+        {
+            get { return learningSets; }
+            set
+            {
+                if (Equals(value, learningSets)) return;
+                learningSets = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public uint Iterations
+        {
+            get { return iterations; }
+            set
+            {
+                if (value == iterations) return;
+                iterations = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public uint MaxIterations
+        {
+            get { return maxIterations; }
+            set
+            {
+                if (value == maxIterations) return;
+                maxIterations = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public double ActualError
+        {
+            get { return actualError; }
+            set
+            {
+                if (value.Equals(actualError)) return;
+                actualError = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ConversionType ConversionType
+        {
+            get { return conversionType; }
+            set
+            {
+                if (value == conversionType) return;
+                conversionType = value;
+                OnPropertyChanged();
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            var handler = PropertyChanged;
+            PropertyChangedEventHandler handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }

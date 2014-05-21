@@ -154,6 +154,22 @@ namespace NuralNetwork
                     throw new InvalidOperationException("Error with teaching");
             } while (networkError > MaxNetworkError);
         }
+        public void TeachNetwork(IEnumerable<TeachingVector> vectors, double MaxNetworkError, Action<uint, double> notifyIteration, ulong maxLoops = 40000)
+        {
+            if (notifyIteration == null) throw new ArgumentNullException("notifyIteration");
+            var teachingVectors = vectors as TeachingVector[] ?? vectors.ToArray();
+            var vectorCounts = teachingVectors.Count();
+            double networkError = 0;
+            uint max = 0;
+            do
+            {
+                networkError = teachingVectors.Average(vector => TeachNetworkWithVector(vector, vectorCounts));
+                max++;
+                notifyIteration(max, networkError);
+                if (max > maxLoops)
+                    throw new InvalidOperationException("Error with teaching");
+            } while (networkError > MaxNetworkError);
+        }
         private double TeachNetworkWithVector(TeachingVector vector, double teachVectorCount)
         {
             var response = CalculateResponse(vector.Inputs);
@@ -165,15 +181,14 @@ namespace NuralNetwork
 
         private void PropagateErrors()
         {
-            for (int i = layersCount - 2; i >= 0; i--)
+            for (var i = layersCount - 2; i >= 0; i--)
             {
-                for (int j = 0; j < layers[i].Neurons.Length; j++)
+                for (var j = 0; j < layers[i].Neurons.Length; j++)
                 {
                     layers[i].Neurons[j].Error = 0.0;
-                    Neuron actualNeuron = layers[i].Neurons[j];
-                    for (int k = 0; k < layers[i + 1].Neurons.Length; k++)
+                    var actualNeuron = layers[i].Neurons[j];
+                    foreach (var outerNeuron in layers[i + 1].Neurons)
                     {
-                        Neuron outerNeuron = layers[i + 1].Neurons[k];
                         actualNeuron.Error += actualNeuron.Output*(1.0 - actualNeuron.Output)*outerNeuron.Error*
                                               outerNeuron.Weights[j];
                     }

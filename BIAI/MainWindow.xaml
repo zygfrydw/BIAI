@@ -2,65 +2,134 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:biai="clr-namespace:BIAI"
-        Title="MainWindow" Height="443" Width="909" Name="Window">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="231*"/>
-            <ColumnDefinition Width="252*"/>
-            <ColumnDefinition Width="214*"/>
-            <ColumnDefinition Width="204*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="258"/>
-        </Grid.RowDefinitions>
-        <TabControl ItemsSource="{Binding ElementName=Window, Path=LearningSets}" HorizontalAlignment="Left" Width="217" Margin="10,10,0,-50" >
-            <TabControl.ItemTemplate>
-                <DataTemplate>
-                    <Label Content="{Binding Name}"/>
-                </DataTemplate>
-            </TabControl.ItemTemplate>
-            <TabControl.ContentTemplate>
-                <DataTemplate DataType="biai:LearningSet">
-                    <ListBox ItemsSource="{Binding Letters}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Image Source="{Binding Image}"/>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </DataTemplate>
-            </TabControl.ContentTemplate>
-        </TabControl>
-        <StackPanel Grid.Column="1" Margin="10,10,32,-143">
-            <Label Content="Ścieżka do zestawu uczącego"/>
-            <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=LearningSetPath}" MouseDoubleClick="TextBox_MouseDoubleClick"/>
-            <Button Name="LoadButton" Content="Załaduj" Height="33" Click="LoadButton_Click" Margin="0,10"/>
-            <Label Content="Maksymalny błąd"/>
-            <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.NetworkError}"/>
-            <Label Content="Alpha"/>
-            <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.Alpha}"/>
-            <Label Content="Beta"/>
-            <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.Beta}"/>
-            <Label Content="Eta"/>
-            <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.Eta}"/>
-            <Button Name="CreateNetork"  Content="Utwórz sieć" Height="43" Click="CreateNetork_Click" Margin="0,10"/>
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        Title="MainWindow" Height="503" Width="909" Name="Window">
+    <Window.Resources>
+        <ObjectDataProvider MethodName="GetValues"
+                ObjectType="{x:Type sys:Enum}"
+                x:Key="ConversionMethods">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="biai:ConversionType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+    <xctk:BusyIndicator IsBusy="{Binding ElementName=Window, Path=IsBusy}">
+        <xctk:BusyIndicator.BusyContent>
+            <StackPanel>
+                <Label FontSize="16" FontWeight="Bold">Proszę czekać trwa tworzenie sieci</Label>
+                <Label Name="IterationLabel" HorizontalAlignment="Center">
+                    <Label.Content>
+                        <TextBox IsReadOnly="True" Background="{x:Null}" BorderBrush="{x:Null}">
+                            <TextBox.Text>
+                                <MultiBinding StringFormat="{}Liczba iteracji: {0}/{1}">
+                                    <Binding Path="Iterations" />
+                                    <Binding Path="MaxIterations" />
+                                </MultiBinding>
+                            </TextBox.Text>
+                        </TextBox>
 
 
-        </StackPanel>
-        <StackPanel Grid.Column="2" HorizontalAlignment="Left" Margin="10,10,0,-50" Width="194">
-            <Image Name="InputImageControl" Source="{Binding ElementName=Window, Path=InputImage}"  Height="93" VerticalAlignment="Top" Margin="50,10,50,0" MouseDown="InputImage_OnMouseDown"/>
-            <Button Content="Załaduj obraz" Margin="0,10,0,0" Click="Button_Click_1"/>
-            <Button Content="Przelicz" HorizontalAlignment="Left" VerticalAlignment="Top" Width="174" Margin="10,10,0,10" Height="43" Click="Button_Click"/>
-            <Label Content="Wynik"/>
-            <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=AnsereLetter}"/>
-        </StackPanel>
-        <StackPanel Grid.Column="3" HorizontalAlignment="Left" Height="299" Margin="10,10,0,-50" VerticalAlignment="Top" Width="184">
-            <DataGrid Height="293" ItemsSource="{Binding ElementName=Window, Path=Answere}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding}"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </StackPanel>
-        <Button Content="Stop" Grid.Column="2" Margin="10,314,10,-143" Click="Button_Click_2"/>
-    </Grid>
+                    </Label.Content>
+                </Label>
+                <Label HorizontalAlignment="Center"
+                       Content="{Binding Path=NetworkParameters.ActualError, ElementName=Window}" ContentStringFormat="Aktualny bład {0:F6}">
+                </Label>
+                <Button Content="Anuluj" Click="CancelButtonClick" Background="#FFF04242" FontWeight="Bold" Foreground="White" Height="30" FontSize="14"/>
+            </StackPanel>
+
+        </xctk:BusyIndicator.BusyContent>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="231*" />
+                <ColumnDefinition Width="252*" />
+                <ColumnDefinition Width="214*" />
+                <ColumnDefinition Width="204*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="258" />
+            </Grid.RowDefinitions>
+            <TabControl Name="LettersTabControl" ItemsSource="{Binding ElementName=Window, Path=NetworkParameters.LearningSets}"
+                        HorizontalAlignment="Left" Width="211" Margin="10,10,0,-184">
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <Label Content="{Binding Name}" />
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate DataType="biai:LearningSet">
+                        <ListBox ItemsSource="{Binding Letters}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding Image}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
+            <StackPanel Grid.Column="1" Margin="10,0,10,-194">
+                <Label Content="Ścieżka do zestawu uczącego" />
+                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=LearningSetPath}"
+                         MouseDoubleClick="TextBox_MouseDoubleClick" />
+                <Button Name="LoadButton" Content="Załaduj" Height="33" Click="LoadButton_Click" Margin="0,10" />
+                <Label Content="Maksymalny błąd" />
+                <TextBox Height="23" TextWrapping="Wrap"
+                         Text="{Binding ElementName=Window, Path=NetworkParameters.NetworkError}" />
+                <Label Content="Alpha - współczynnik momentum" />
+                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.Alpha}" ToolTip="Reguluje on wpływ zmiany wag na proces uczenia. (0:1)"/>
+                <Label Content="Beta - nachylenie krzywej" />
+                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.Beta}" ToolTip="Nachylenie krzywej sigmoidalnej"/>
+                <Label Content="Eta - współczynnik uczenia" />
+                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.Eta}" ToolTip="Wpływa na szybkość uczenia poprzez bezpośrednie oddziaływanie na gradient zmiany (0.01 : 0.6)"/>
+                <Label Content="Maksymalna liczba iteracji" />
+                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.MaxIterations}" />
+                <Label Content="Sposób konwersji" />
+                <ComboBox SelectedItem="{Binding ElementName=Window, Path=NetworkParameters.ConversionType}" ItemsSource="{Binding Source={StaticResource ConversionMethods}}"/>
+                <Button Name="CreateNetork" Content="Utwórz sieć" Height="43" Click="CreateNetork_Click" Margin="0,10" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" HorizontalAlignment="Left" Margin="10,10,0,-50" Width="194">
+                <StackPanel.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=Window, Path=NeuralNetworkWraper}"
+                                         Value="{x:Null}">
+                                <Setter Property="StackPanel.IsEnabled" Value="False"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <Image Name="InputImageControl" Source="{Binding ElementName=Window, Path=InputImage}" Height="93"
+                       VerticalAlignment="Top" Margin="50,10,50,0" MouseDown="InputImage_OnMouseDown" />
+                <Button Content="Załaduj obraz" Margin="0,10,0,0" Click="LoadQueryImage" />
+                <Button Content="Przelicz" HorizontalAlignment="Left" VerticalAlignment="Top" Width="194" Margin="0,10"
+                        Height="43" Click="CalculateAnswereClick" />
+                <Label Content="Wynik" />
+                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=AnsereLetter}" />
+            </StackPanel>
+            <StackPanel Grid.Column="3" HorizontalAlignment="Left" Height="436" Margin="10,10,0,-187"
+                        VerticalAlignment="Top" Width="184" RenderTransformOrigin="0.5,0.5">
+                <StackPanel.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform AngleX="0.129"/>
+                        <RotateTransform/>
+                        <TranslateTransform X="0.498"/>
+                    </TransformGroup>
+                </StackPanel.RenderTransform>
+                <Label Content="Wyniki:" FontSize="20" FontWeight="Bold" ></Label>
+                <DataGrid Height="391" ItemsSource="{Binding ElementName=Window, Path=Answere}" AutoGenerateColumns="False">
+                    <DataGrid.Resources>
+                        <biai:RowToIndexConverter x:Key="RowToIndexConv"></biai:RowToIndexConverter>
+                    </DataGrid.Resources>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding = "{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={StaticResource RowToIndexConv}}" IsReadOnly="True" />
+                        <DataGridTextColumn Binding="{Binding}" Width="*" IsReadOnly="True">
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+        </Grid>
+    </xctk:BusyIndicator>
 </Window>
