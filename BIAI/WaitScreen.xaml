@@ -1,0 +1,14 @@
+﻿<Window x:Class="BIAI.WaitScreen"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        Title="WaitScreen" Height="214" Width="225" WindowStartupLocation="CenterOwner" WindowStyle="None">
+    <Grid>
+        <xctk:BusyIndicator IsBusy="True">
+            
+            <StackPanel>
+                <Button Content="MyButton" Height="58" />
+            </StackPanel>
+        </xctk:BusyIndicator>
+    </Grid>
+</Window>
