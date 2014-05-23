@@ -39,6 +39,7 @@ namespace BIAI
         {
             var vectors = GetTeachingVectors(parameters);
             nuralNetwork = new NeuralNetwork(3, inputsCount, lettersCount, parameters.Eta, parameters.Alpha, parameters.Beta);
+            parameters.Iterations = 0;
             nuralNetwork.TeachNetwork(vectors, parameters.NetworkError, (iteration, error) =>
             {
                 if (iteration % 10 == 0)

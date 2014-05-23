@@ -4,7 +4,7 @@
         xmlns:biai="clr-namespace:BIAI"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        Title="MainWindow" Height="503" Width="909" Name="Window">
+        Title="MainWindow" Height="503" Width="909" Name="Window" Icon="icon3.ico">
     <Window.Resources>
         <ObjectDataProvider MethodName="GetValues"
                 ObjectType="{x:Type sys:Enum}"
@@ -102,7 +102,7 @@
                 </StackPanel.Style>
                 <Image Name="InputImageControl" Source="{Binding ElementName=Window, Path=InputImage}" Height="93"
                        VerticalAlignment="Top" Margin="50,10,50,0" MouseDown="InputImage_OnMouseDown" />
-                <Button Content="Załaduj obraz" Margin="0,10,0,0" Click="LoadQueryImage" />
+                <Button Content="Załaduj obraz" Margin="0,10,0,0" Click="LoadQueryImage" Height="47" />
                 <Button Content="Przelicz" HorizontalAlignment="Left" VerticalAlignment="Top" Width="194" Margin="0,10"
                         Height="43" Click="CalculateAnswereClick" />
                 <Label Content="Wynik" />
