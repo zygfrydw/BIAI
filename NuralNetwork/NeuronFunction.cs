@@ -1,4 +1,4 @@
-﻿namespace BIAI
+﻿namespace NuralNetwork
 {
     public enum NeuronFunction
     {

@@ -1,30 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Windows;
 using System.Windows.Media.Imaging;
-using BIAI.Annotations;
-using NuralNetwork;
 
-namespace BIAI
+namespace NuralNetwork
 {
-    public class NeuralNetworkWraper : INotifyPropertyChanged
+    public class NeuralNetworkWraper
     {
         private Dictionary<string, int> lettersMap;
         private NeuralNetwork nuralNetwork;
-        private double[] answere;
-        private string ansereLetter;
         private ConversionType conversionType;
         private int lettersCount;
 
-        public void TeachNetwork(NetworkParameters parameters, Action<uint, double> notifyChanges)
+        public void TeachNetwork(INetworkParameters parameters, Action<uint, double> notifyChanges)
         {
             lettersMap = new Dictionary<string, int>();
-            var image = parameters.LearningSets[0].Letters[0].Image;
+            var image = parameters.LearningSets.First().Letters.First().Image;
             InputWidth = image.PixelWidth;
             InputHeight = image.PixelHeight;
             conversionType = parameters.ConversionType;
@@ -35,7 +27,7 @@ namespace BIAI
 
         public int InputWidth { get; private set; }
 
-        private void TeachNeuralNetwork(NetworkParameters parameters, Action<uint, double> notifyChanges)
+        private void TeachNeuralNetwork(INetworkParameters parameters, Action<uint, double> notifyChanges)
         {
             var learningSets = GetTeachingVectors(parameters.LearningSets);
             var testSets = GetTeachingVectors(parameters.TestSet);
@@ -43,11 +35,10 @@ namespace BIAI
             var network = new SigmoidalNeuralNetwork(3, inputsCount, lettersCount, parameters.Eta, parameters.Alpha, parameters.Beta);
             network.NeuronActivateFunction = GetSigmoidFunction(parameters);
             nuralNetwork = network;
-            parameters.Iterations = 0;
             nuralNetwork.TeachNetwork(learningSets, testSets, parameters.NetworkError, parameters.MaxIterations, notifyChanges);
         }
 
-        private SigmoidFunction GetSigmoidFunction(NetworkParameters parameters)
+        private SigmoidFunction GetSigmoidFunction(INetworkParameters parameters)
         {
             switch (parameters.NeuronFunction)
             {
@@ -66,19 +57,7 @@ namespace BIAI
             }
         }
 
-        class DistinctComparer : IEqualityComparer<LearningSet>
-        {
-            public bool Equals(LearningSet x, LearningSet y)
-            {
-                return x.Name.Equals(y.Name);
-            }
-
-            public int GetHashCode(LearningSet obj)
-            {
-                return obj.Name.GetHashCode();
-            }
-        }
-        private IEnumerable<TeachingVector> GetTeachingVectors(IEnumerable<LearningSet> collection)
+        private IEnumerable<TeachingVector> GetTeachingVectors(IEnumerable<ILearningSet> collection)
         {
             var vector = new List<TeachingVector>();
             var learningSets = collection.SelectMany(x => x.Letters).ToList();
@@ -141,27 +120,9 @@ namespace BIAI
             return AnsereLetter;
         }
 
-        public string AnsereLetter
-        {
-            get { return ansereLetter; }
-            set
-            {
-                if (value == ansereLetter) return;
-                ansereLetter = value;
-                OnPropertyChanged();
-            }
-        }
+        public string AnsereLetter { get; set; }
 
-        public double[] Answere
-        {
-            get { return answere; }
-            set
-            {
-                if (Equals(value, answere)) return;
-                answere = value;
-                OnPropertyChanged();
-            }
-        }
+        public double[] Answere { get; set; }
 
         private double[] EncodeOneToN(int i)
         {
@@ -170,15 +131,7 @@ namespace BIAI
             return table;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            var handler = PropertyChanged;
-            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-        }
-
+       
         public int inputsCount { get { return InputHeight*InputWidth; }}
     }
 }

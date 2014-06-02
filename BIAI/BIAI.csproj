@@ -83,9 +83,7 @@
     <Compile Include="AbortableWorker.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ConversionType.cs" />
     <Compile Include="LearningSets.cs" />
-    <Compile Include="NeuronFunction.cs" />
     <Compile Include="RowToIndexConverter.cs" />
     <Compile Include="WaitScreen.xaml.cs">
       <DependentUpon>WaitScreen.xaml</DependentUpon>
@@ -109,7 +107,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NetworkParameters.cs" />
-    <Compile Include="NeuralNetworkWraper.cs" />
     <Compile Include="ObservableCollectionUtility.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

@@ -233,6 +233,7 @@ namespace BIAI
             try
             {
                 var parameters = doWorkEventArgs.Argument as NetworkParameters;
+                parameters.Iterations = 0;
                 networkWraper.TeachNetwork(parameters, 
                 (iteration, error) =>
                 {

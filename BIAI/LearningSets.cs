@@ -1,16 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Drawing;
-using System.Net.Mime;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows;
 using System.Windows.Media.Imaging;
 using BIAI.Annotations;
 
-namespace BIAI
+namespace NuralNetwork
 {
-    public class LearningSet : INotifyPropertyChanged
+    public class LearningSet : INotifyPropertyChanged, ILearningSet
     {
         private string name;
         private List<TeachLetter> letters;
@@ -37,6 +34,10 @@ namespace BIAI
             }
         }
 
+        IEnumerable<ITeachLetter> ILearningSet.Letters
+        {
+            get { return Letters; }
+        }
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
@@ -47,7 +48,9 @@ namespace BIAI
         }
     }
 
-    public class TeachLetter : INotifyPropertyChanged
+
+
+    public class TeachLetter : INotifyPropertyChanged, ITeachLetter
     {
         private BitmapImage image;
         private string name;

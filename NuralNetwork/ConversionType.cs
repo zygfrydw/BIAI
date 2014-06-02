@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace BIAI
+namespace NuralNetwork
 {
     public enum ConversionType
     {

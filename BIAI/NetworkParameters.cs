@@ -1,11 +1,14 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using BIAI.Annotations;
+using NuralNetwork;
 
 namespace BIAI
 {
-    public class NetworkParameters : INotifyPropertyChanged
+    public class NetworkParameters : INotifyPropertyChanged, INetworkParameters
     {
         private double actualError;
         private double alpha;
@@ -157,6 +160,19 @@ namespace BIAI
         {
             PropertyChangedEventHandler handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+        IEnumerable<ILearningSet> INetworkParameters.LearningSets
+        {
+            get { return LearningSets; }
+           
+        }
+
+        IEnumerable<ILearningSet> INetworkParameters.TestSet
+        {
+            get { return TestSet; }
+            
         }
     }
 }
