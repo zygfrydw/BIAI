@@ -16,6 +16,7 @@ namespace BIAI
         private ObservableCollection<LearningSet> learningSets;
         private uint maxIterations;
         private double networkError;
+        private ObservableCollection<LearningSet> testSet;
 
         public NetworkParameters()
         {
@@ -121,6 +122,17 @@ namespace BIAI
             {
                 if (value == conversionType) return;
                 conversionType = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<LearningSet> TestSet
+        {
+            get { return testSet; }
+            set
+            {
+                if (Equals(value, testSet)) return;
+                testSet = value;
                 OnPropertyChanged();
             }
         }

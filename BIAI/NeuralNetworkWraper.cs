@@ -21,35 +21,28 @@ namespace BIAI
         private ConversionType conversionType;
         private int lettersCount;
 
-        public void TeachNetwork(NetworkParameters parameters)
+        public void TeachNetwork(NetworkParameters parameters, Action<uint, double> notifyChanges)
         {
             lettersMap = new Dictionary<string, int>();
             var image = parameters.LearningSets[0].Letters[0].Image;
             InputWidth = image.PixelWidth;
             InputHeight = image.PixelHeight;
             conversionType = parameters.ConversionType;
-            TeachNeuralNetwork(parameters);
+            TeachNeuralNetwork(parameters, notifyChanges);
         }
 
         public int InputHeight { get; private set; }
 
         public int InputWidth { get; private set; }
 
-        private void TeachNeuralNetwork(NetworkParameters parameters)
+        private void TeachNeuralNetwork(NetworkParameters parameters, Action<uint, double> notifyChanges)
         {
-            var vectors = GetTeachingVectors(parameters);
-            nuralNetwork = new NeuralNetwork(3, inputsCount, lettersCount, parameters.Eta, parameters.Alpha, parameters.Beta);
+            var learningSets = GetTeachingVectors(parameters.LearningSets);
+            var testSets = GetTeachingVectors(parameters.TestSet);
+            
+            nuralNetwork = new SigmoidalNeuralNetwork(3, inputsCount, lettersCount, parameters.Eta, parameters.Alpha, parameters.Beta);
             parameters.Iterations = 0;
-            nuralNetwork.TeachNetwork(vectors, parameters.NetworkError, (iteration, error) =>
-            {
-                if (iteration % 10 == 0)
-                {
-                    parameters.Iterations = iteration;
-                    parameters.ActualError = error;
-                }
-            },
-            parameters.MaxIterations
-            );
+            nuralNetwork.TeachNetwork(learningSets, testSets, parameters.NetworkError, parameters.MaxIterations, notifyChanges);
         }
 
         class DistinctComparer : IEqualityComparer<LearningSet>
@@ -64,10 +57,10 @@ namespace BIAI
                 return obj.Name.GetHashCode();
             }
         }
-        private IEnumerable<TeachingVector> GetTeachingVectors(NetworkParameters parameters)
+        private IEnumerable<TeachingVector> GetTeachingVectors(IEnumerable<LearningSet> collection)
         {
             var vector = new List<TeachingVector>();
-            var learningSets = parameters.LearningSets.SelectMany(x => x.Letters).ToList();
+            var learningSets = collection.SelectMany(x => x.Letters).ToList();
             var i = 0;
             lettersMap = learningSets.Select(x => x.Name).Distinct().ToDictionary( x => x, y => i++);
             lettersCount = lettersMap.Count();

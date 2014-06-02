@@ -13,7 +13,45 @@ namespace NuralNetwork
         public double[] Outputs;
     }
 
-    public class NeuralNetwork
+
+    public class ErrorCalculation {
+	private double globalError;
+	private int setSize;
+
+
+    /// <summary>
+    ///  Returns the root mean square error for a complete training set.
+    ///  <returns>The current error for the neural network.</returns>
+    /// </summary>
+	public double CalculateRms() {
+		double err = Math.Sqrt(this.globalError / (this.setSize));
+		return err;
+	}
+
+	/// <summary>
+    ///  Reset the error accumulation to zero.
+	/// </summary>
+	public void Reset() {
+		globalError = 0;
+		setSize = 0;
+	}
+
+	/// <summary>
+	///  Called to update for each number that should be checked.
+    ///  <param name="actual">The actual output.</param> 
+    ///  <param name="ideal">The ideal output</param>
+    /// </summary>
+	public void UpdateError(double[] actual,  double[] ideal) {
+		for (int i = 0; i < actual.Length; i++) {
+			double delta = ideal[i] - actual[i];
+			globalError += delta * delta;
+			setSize += ideal.Length;
+		}
+	}
+
+}
+
+    public abstract class NeuralNetwork
     {
         
         class Neuron
@@ -40,21 +78,20 @@ namespace NuralNetwork
         private double eta; 
         //Wspołczynnik mementum
         private double alfa;
-        //Współczynnik stromośvi krzywej
-        private double beta;
-        public NeuralNetwork(int layersCount, int inputs, int outputs, double eta = 0.2, double alfa = 0.6, double beta =1.0)
+        private readonly ErrorCalculation errorCalculator;
+
+        public NeuralNetwork(int layersCount, int inputs, int outputs, double eta = 0.2, double alfa = 0.6)
         {
             this.layersCount = layersCount;
             this.inputs = inputs;
             this.outputs = outputs;
             this.eta = eta;
             this.alfa = alfa;
-            this.beta = beta;
             inputLayer = 0;
             outputLayer = this.layersCount - 1;
             CreateLayersWithNeurons();
             CreateWeightsTableAndRandomize();
-            
+            errorCalculator = new ErrorCalculation();
         }
 
         private void CreateLayersWithNeurons()
@@ -71,10 +108,14 @@ namespace NuralNetwork
 
         private void CreateWeightsTableAndRandomize()
         {
+            InitializeInputLayerWeights();
+            RandomizeWeights();
+        }
+
+        private void RandomizeWeights()
+        {
             var rand = new Random();
 
-            InitializeInputLayerWeights();
-            
             for (int i = 1; i < layersCount; i++)
             {
                 for (int j = 0; j < layers[i].Neurons.Length; j++)
@@ -85,8 +126,8 @@ namespace NuralNetwork
                     layers[i].Neurons[j].PrevWeights = new double[previousLayerCardinality];
                     for (int k = 0; k < previousLayerCardinality; k++)
                     {
-                        var randNumber = (((rand.Next() % 1000000L) / 1700.0) - 9.8) * 0.0015;
-                        if(randNumber == 0)
+                        var randNumber = (((rand.Next()%1000000L)/1700.0) - 9.8)*0.0015;
+                        if (randNumber == 0)
                             randNumber = 0.01492;
                         layers[i].Neurons[j].Weights[k] = randNumber;
                     }
@@ -135,48 +176,53 @@ namespace NuralNetwork
                     for (int k = 0; k < layers[i].Neurons[j].Weights.Length; k++)
                     {
                         layers[i].Neurons[j].Input += layers[i - 1].Neurons[k].Output*layers[i].Neurons[j].Weights[k];
-                        layers[i].Neurons[j].Output = 1.0/(1.0 + Math.Exp(beta*(-layers[i].Neurons[j].Input)));
+                        var input = layers[i].Neurons[j].Input;
+                        layers[i].Neurons[j].Output = NeuronFunction(input);
                     }
                 }
             }
         }
 
-        public void TeachNetwork(IEnumerable<TeachingVector> vectors, double MaxNetworkError, ulong maxLoops = 20000)
+        protected abstract double NeuronFunction(double input);
+
+
+        public void TeachNetwork(IEnumerable<TeachingVector> teachingVectors, IEnumerable<TeachingVector> testVectors, double maxNetworkError, ulong maxLoops = 40000, Action<uint, double> notifyIteration = null)
         {
-            var vectorCounts = vectors.Count();
-            double networkError = 0;
-            ulong max = 0;
-            do
-            {
-                networkError = vectors.Average(vector => TeachNetworkWithVector(vector, vectorCounts));
-                max++;
-                if(max > maxLoops)
-                    throw new InvalidOperationException("Error with teaching");
-            } while (networkError > MaxNetworkError);
-        }
-        public void TeachNetwork(IEnumerable<TeachingVector> vectors, double MaxNetworkError, Action<uint, double> notifyIteration, ulong maxLoops = 40000)
-        {
-            if (notifyIteration == null) throw new ArgumentNullException("notifyIteration");
-            var teachingVectors = vectors as TeachingVector[] ?? vectors.ToArray();
-            var vectorCounts = teachingVectors.Count();
-            double networkError = 0;
             uint max = 0;
+            double networkError;
+            
             do
             {
-                networkError = teachingVectors.Average(vector => TeachNetworkWithVector(vector, vectorCounts));
+                foreach (var vector in teachingVectors)
+                {
+                    TeachNetworkWithVector(vector);
+                }
+
+                networkError = CalculateNetworkError(testVectors);
+
                 max++;
-                notifyIteration(max, networkError);
+                if (notifyIteration != null) 
+                    notifyIteration(max, networkError);
+                
                 if (max > maxLoops)
                     throw new InvalidOperationException("Error with teaching");
-            } while (networkError > MaxNetworkError);
+            } while (networkError > maxNetworkError);
         }
-        private double TeachNetworkWithVector(TeachingVector vector, double teachVectorCount)
+
+        private void TeachNetworkWithVector(TeachingVector vector)
         {
             var response = CalculateResponse(vector.Inputs);
             CalculateResponseErrorOnOutputs(vector.Outputs, response);
             PropagateErrors();
             ApplayNewWeights();
-            return CalulateNetworkError(vector.Outputs, teachVectorCount);
+        }
+
+        private void CalculateResponseErrorOnOutputs(double[] expected, double[] response)
+        {
+            for (int i = 0; i < response.Length; i++)
+            {
+                layers[outputLayer].Neurons[i].Error = expected[i] - response[i];
+            }
         }
 
         private void PropagateErrors()
@@ -193,14 +239,6 @@ namespace NuralNetwork
                                               outerNeuron.Weights[j];
                     }
                 }
-            }
-        }
-
-        private void CalculateResponseErrorOnOutputs(double[] expected, double[] response)
-        {
-            for (int i = 0; i < response.Length; i++)
-            {
-                layers[outputLayer].Neurons[i].Error = expected[i] - response[i];
             }
         }
 
@@ -222,16 +260,58 @@ namespace NuralNetwork
             }
         }
 
-        private double CalulateNetworkError(double[] expected, double teachVectorCount)
+        private double CalculateNetworkError(IEnumerable<TeachingVector> testVectors)
         {
-            double RMS = 0;
-            for (int j = 0; j < outputs; j++)
+            errorCalculator.Reset();
+            foreach (var vector in testVectors)
             {
-                var sqrt = (expected[j] - layers[outputLayer].Neurons[j].Output);
-                RMS += sqrt * sqrt;
+                var networkOutput = CalculateResponse(vector.Inputs);
+                errorCalculator.UpdateError(networkOutput, vector.Outputs);
             }
-            var ERMS = Math.Sqrt(RMS/(double) (teachVectorCount*outputs));
-            return ERMS;
+            return errorCalculator.CalculateRms();
+        }
+    }
+
+    public static class NeuronFunctions
+    {
+        public static double Sigmoid(double input)
+        {
+            return 1.0 / (1.0 + Math.Exp(-input));
+        }
+        public static double HyperbolicTangens(double input)
+        {
+            return Math.Tanh(input);
+        }
+        public static double Sinusoidal(double input)
+        {
+            return Math.Sin(input);
+        }
+        public static double Cosinusoidal(double input)
+        {
+            return Math.Cos(input);
+        }
+        public static double Function001(double input)
+        {
+            return input / (1 + Math.Abs(input));
+        }
+    }
+
+    public delegate double SigmoidFunction(double input); 
+    public class SigmoidalNeuralNetwork : NeuralNetwork
+    {
+        //Współczynnik stromości krzywej
+        private readonly double beta;
+        public SigmoidFunction NeuronActivateFunction; 
+
+        public SigmoidalNeuralNetwork(int layersCount, int inputs, int outputs, double eta = 0.2, double alfa = 0.6, double beta = 1) : base(layersCount, inputs, outputs, eta, alfa)
+        {
+            this.beta = beta;
+            NeuronActivateFunction = NeuronFunctions.Sigmoid;
+        }
+
+        protected override double NeuronFunction(double input)
+        {
+            return NeuronActivateFunction(beta *input);
         }
     }
 }

@@ -4,7 +4,7 @@
         xmlns:biai="clr-namespace:BIAI"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        Title="MainWindow" Height="503" Width="909" Name="Window" Icon="icon3.ico">
+        Title="MainWindow" Height="503" Width="1316" Name="Window" Icon="icon3.ico">
     <Window.Resources>
         <ObjectDataProvider MethodName="GetValues"
                 ObjectType="{x:Type sys:Enum}"
@@ -41,55 +41,50 @@
         </xctk:BusyIndicator.BusyContent>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="231*" />
-                <ColumnDefinition Width="252*" />
+                <ColumnDefinition Width="225*" />
+                <ColumnDefinition Width="193*" />
                 <ColumnDefinition Width="214*" />
-                <ColumnDefinition Width="204*" />
+                <ColumnDefinition Width="221*"/>
+                <ColumnDefinition Width="234*"/>
+                <ColumnDefinition Width="221*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="258" />
+                <RowDefinition Height="472" />
             </Grid.RowDefinitions>
-            <TabControl Name="LettersTabControl" ItemsSource="{Binding ElementName=Window, Path=NetworkParameters.LearningSets}"
-                        HorizontalAlignment="Left" Width="211" Margin="10,10,0,-184">
-                <TabControl.ItemTemplate>
-                    <DataTemplate>
-                        <Label Content="{Binding Name}" />
-                    </DataTemplate>
-                </TabControl.ItemTemplate>
-                <TabControl.ContentTemplate>
-                    <DataTemplate DataType="biai:LearningSet">
-                        <ListBox ItemsSource="{Binding Letters}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Image Source="{Binding Image}" />
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </DataTemplate>
-                </TabControl.ContentTemplate>
-            </TabControl>
-            <StackPanel Grid.Column="1" Margin="10,0,10,-194">
+            <StackPanel x:Name="TeachingSet" Margin="10">
+                <Label>Zbiór uczący</Label>
+                <TabControl x:Name="LearningLetersControl"
+                            ItemsSource="{Binding ElementName=Window, Path=NetworkParameters.LearningSets}" Margin="0,10" Grid.RowSpan="2" Height="400">
+                    <TabControl.ItemTemplate>
+                        <DataTemplate>
+                            <Label Content="{Binding Name}" />
+                        </DataTemplate>
+                    </TabControl.ItemTemplate>
+                    <TabControl.ContentTemplate>
+                        <DataTemplate DataType="biai:LearningSet">
+                            <ListBox ItemsSource="{Binding Letters}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding Image}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DataTemplate>
+                    </TabControl.ContentTemplate>
+                </TabControl>
+            </StackPanel>
+            <StackPanel x:Name="LoadSets" Grid.Column="2" Margin="10">
                 <Label Content="Ścieżka do zestawu uczącego" />
-                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=LearningSetPath}"
-                         MouseDoubleClick="TextBox_MouseDoubleClick" />
-                <Button Name="LoadButton" Content="Załaduj" Height="33" Click="LoadButton_Click" Margin="0,10" />
-                <Label Content="Maksymalny błąd" />
-                <TextBox Height="23" TextWrapping="Wrap"
-                         Text="{Binding ElementName=Window, Path=NetworkParameters.NetworkError}" />
-                <Label Content="Alpha - współczynnik momentum" />
-                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.Alpha}" ToolTip="Reguluje on wpływ zmiany wag na proces uczenia. (0:1)"/>
-                <Label Content="Beta - nachylenie krzywej" />
-                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.Beta}" ToolTip="Nachylenie krzywej sigmoidalnej"/>
-                <Label Content="Eta - współczynnik uczenia" />
-                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.Eta}" ToolTip="Wpływa na szybkość uczenia poprzez bezpośrednie oddziaływanie na gradient zmiany (0.01 : 0.6)"/>
-                <Label Content="Maksymalna liczba iteracji" />
-                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=NetworkParameters.MaxIterations}" />
-                <Label Content="Sposób konwersji" />
-                <ComboBox SelectedItem="{Binding ElementName=Window, Path=NetworkParameters.ConversionType}" ItemsSource="{Binding Source={StaticResource ConversionMethods}}"/>
-                <Button Name="CreateNetork" Content="Utwórz sieć" Height="43" Click="CreateNetork_Click" Margin="0,10" />
+                <TextBox Height="100" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=LearningSetPath}"
+                         MouseDoubleClick="LoadLearning_MouseDoubleClick" />
+                <Button Name="LoadButton" Content="Załaduj zestaw uczący" Height="33" Click="LoadLearningSet_Click" Margin="0,10" />
+                <Label Content="Ścieżka do zestawu testującego" />
+                <TextBox Height="100" TextWrapping="Wrap" Text="{Binding TestSetPath, ElementName=Window}"
+                	MouseDoubleClick="LoadTest_MouseDoubleClick" />
+                <Button x:Name="LoadButton_Copy" Content="Załaduj zestaw testujący" Height="33" Click="LoadTestSet_Click" Margin="0,10" />
             </StackPanel>
 
-            <StackPanel Grid.Column="2" HorizontalAlignment="Left" Margin="10,10,0,-50" Width="194">
+            <StackPanel x:Name="TestPanel" Grid.Column="4" HorizontalAlignment="Left" Margin="10,10,0,49" Width="194">
                 <StackPanel.Style>
                     <Style>
                         <Style.Triggers>
@@ -108,8 +103,9 @@
                 <Label Content="Wynik" />
                 <TextBox Height="23" TextWrapping="Wrap" Text="{Binding ElementName=Window, Path=AnsereLetter}" />
             </StackPanel>
-            <StackPanel Grid.Column="3" HorizontalAlignment="Left" Height="436" Margin="10,10,0,-187"
-                        VerticalAlignment="Top" Width="184" RenderTransformOrigin="0.5,0.5">
+            <StackPanel x:Name="ResultPanel" Grid.Column="5" Height="436" Margin="10,10,10
+                        ,0"
+                        VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5">
                 <StackPanel.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform/>
@@ -129,6 +125,44 @@
                         </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
+            </StackPanel>
+            <StackPanel x:Name="TestSet" Margin="10,10,4,10" Grid.Column="1">
+                <Label Content="Zbiór testowy"/>
+                <TabControl x:Name="TestLetersControl"
+            		ItemsSource="{Binding NetworkParameters.TestSet, ElementName=Window}" Margin="0,10" Grid.RowSpan="2" Height="400">
+                    <TabControl.ItemTemplate>
+                        <DataTemplate>
+                            <Label Content="{Binding Name}" />
+                        </DataTemplate>
+                    </TabControl.ItemTemplate>
+                    <TabControl.ContentTemplate>
+                        <DataTemplate DataType="biai:LearningSet">
+                            <ListBox ItemsSource="{Binding Letters}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding Image}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DataTemplate>
+                    </TabControl.ContentTemplate>
+                </TabControl>
+            </StackPanel>
+            <StackPanel x:Name="Settings" Orientation="Vertical" Grid.Column="3" Margin="10">
+                <Label Content="Maksymalny błąd" />
+                <TextBox Height="23" TextWrapping="Wrap"
+            		Text="{Binding NetworkParameters.NetworkError, ElementName=Window}" />
+                <Label Content="Alpha - współczynnik momentum" />
+                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding NetworkParameters.Alpha, ElementName=Window}" ToolTip="Reguluje on wpływ zmiany wag na proces uczenia. (0:1)"/>
+                <Label Content="Beta - nachylenie krzywej" />
+                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding NetworkParameters.Beta, ElementName=Window}" ToolTip="Nachylenie krzywej sigmoidalnej"/>
+                <Label Content="Eta - współczynnik uczenia" />
+                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding NetworkParameters.Eta, ElementName=Window}" ToolTip="Wpływa na szybkość uczenia poprzez bezpośrednie oddziaływanie na gradient zmiany (0.01 : 0.6)"/>
+                <Label Content="Maksymalna liczba iteracji" />
+                <TextBox Height="23" TextWrapping="Wrap" Text="{Binding NetworkParameters.MaxIterations, ElementName=Window}" />
+                <Label Content="Sposób konwersji" />
+                <ComboBox SelectedItem="{Binding NetworkParameters.ConversionType, ElementName=Window}" ItemsSource="{Binding Source={StaticResource ConversionMethods}}"/>
+                <Button x:Name="CreateNetork" Content="Utwórz sieć" Height="43" Click="CreateNetork_Click" Margin="0,10,0,0" />
             </StackPanel>
         </Grid>
     </xctk:BusyIndicator>

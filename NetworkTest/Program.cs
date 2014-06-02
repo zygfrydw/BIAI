@@ -12,9 +12,9 @@ namespace NetworkTest
         static void Main(string[] args)
         {
             //Sieć rozpoznająca 4 znaki w macierzy 3x3
-            var network = new NeuralNetwork(3, 9, 4);
+            var network = new SigmoidalNeuralNetwork(3, 9, 4);
             var teachingVectors = createTeachingVectors();
-            network.TeachNetwork(teachingVectors, 0.05);
+            network.TeachNetwork(teachingVectors, teachingVectors,  0.05);
             Console.WriteLine("Query 1");
             var query = new double[] { 0, 0, 0, 0, 1, 1, 1, 0, 0 };
             var answere = network.CalculateResponse(query);
