@@ -17,6 +17,7 @@ namespace BIAI
         private uint maxIterations;
         private double networkError;
         private ObservableCollection<LearningSet> testSet;
+        private NeuronFunction neuronFunction;
 
         public NetworkParameters()
         {
@@ -125,6 +126,18 @@ namespace BIAI
                 OnPropertyChanged();
             }
         }
+
+        public NeuronFunction NeuronFunction
+        {
+            get { return neuronFunction; }
+            set
+            {
+                if (value == neuronFunction) return;
+                neuronFunction = value;
+                OnPropertyChanged();
+            }
+        }
+
 
         public ObservableCollection<LearningSet> TestSet
         {

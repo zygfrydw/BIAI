@@ -85,6 +85,7 @@
     </Compile>
     <Compile Include="ConversionType.cs" />
     <Compile Include="LearningSets.cs" />
+    <Compile Include="NeuronFunction.cs" />
     <Compile Include="RowToIndexConverter.cs" />
     <Compile Include="WaitScreen.xaml.cs">
       <DependentUpon>WaitScreen.xaml</DependentUpon>

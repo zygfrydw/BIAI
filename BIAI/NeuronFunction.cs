@@ -4,8 +4,8 @@
     {
         Sigmoid,
         HyperbolicTangens,
-        Sinusoidal,
+        Sinusoida,
         Cosinusoidal,
-        Custom
+        Function001
     }
 }

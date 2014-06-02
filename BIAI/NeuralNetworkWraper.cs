@@ -39,10 +39,31 @@ namespace BIAI
         {
             var learningSets = GetTeachingVectors(parameters.LearningSets);
             var testSets = GetTeachingVectors(parameters.TestSet);
-            
-            nuralNetwork = new SigmoidalNeuralNetwork(3, inputsCount, lettersCount, parameters.Eta, parameters.Alpha, parameters.Beta);
+
+            var network = new SigmoidalNeuralNetwork(3, inputsCount, lettersCount, parameters.Eta, parameters.Alpha, parameters.Beta);
+            network.NeuronActivateFunction = GetSigmoidFunction(parameters);
+            nuralNetwork = network;
             parameters.Iterations = 0;
             nuralNetwork.TeachNetwork(learningSets, testSets, parameters.NetworkError, parameters.MaxIterations, notifyChanges);
+        }
+
+        private SigmoidFunction GetSigmoidFunction(NetworkParameters parameters)
+        {
+            switch (parameters.NeuronFunction)
+            {
+                case NeuronFunction.Sigmoid:
+                    return NeuronFunctions.Sigmoid;
+                case NeuronFunction.HyperbolicTangens:
+                    return NeuronFunctions.HyperbolicTangens;
+                case NeuronFunction.Sinusoida:
+                    return NeuronFunctions.Sinusoidal;
+                case NeuronFunction.Cosinusoidal:
+                    return NeuronFunctions.Cosinusoidal;
+                case NeuronFunction.Function001:
+                    return NeuronFunctions.Function001;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         class DistinctComparer : IEqualityComparer<LearningSet>
