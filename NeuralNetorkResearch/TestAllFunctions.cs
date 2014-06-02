@@ -26,11 +26,13 @@ namespace NeuralNetorkResearch
 
     class TestBeta : TestAllFunctions
     {
+        private readonly string output;
         const double MinBeta = 0.001;
         const double Step = 0.03;
         const double MaxBeta = 3.0;
-        public TestBeta(string learningSetPath, string testSetPath) : base(learningSetPath, testSetPath)
+        public TestBeta(string learningSetPath, string testSetPath, string output) : base(learningSetPath, testSetPath)
         {
+            this.output = output;
         }
 
         protected override void TestFunction(NeuronFunction value)
@@ -40,10 +42,17 @@ namespace NeuralNetorkResearch
             for (double i = MinBeta; i < MaxBeta; i += Step)
             {
                 parameters.Beta = i;
+                Console.WriteLine("Testing network for Beta: " + i);
                 TestNetwork(parameters, statistic);
-                string name = value.ToString() + "_" + i.ToString().Replace('.', '_') + ".csv";
+                var name = GetStatisticFileName(value, i);
                 statistic.Save(name);
             }
+        }
+
+        private string GetStatisticFileName(NeuronFunction value, double i)
+        {
+            string name = output +  @"\" + value.ToString() + "_" + i.ToString().Replace('.', '_') + ".csv";
+            return name;
         }
     }
 
