@@ -33,29 +33,12 @@ namespace NuralNetwork
             var testSets = GetTeachingVectors(parameters.TestSet);
 
             var network = new SigmoidalNeuralNetwork(3, inputsCount, lettersCount, parameters.Eta, parameters.Alpha, parameters.Beta);
-            network.NeuronActivateFunction = GetSigmoidFunction(parameters);
+            network.NeuronActivateFunction = NeuronFunctions.GetFunctionFor(parameters.NeuronFunction);
             nuralNetwork = network;
             nuralNetwork.TeachNetwork(learningSets, testSets, parameters.NetworkError, parameters.MaxIterations, notifyChanges);
         }
 
-        private SigmoidFunction GetSigmoidFunction(INetworkParameters parameters)
-        {
-            switch (parameters.NeuronFunction)
-            {
-                case NeuronFunction.Sigmoid:
-                    return NeuronFunctions.Sigmoid;
-                case NeuronFunction.HyperbolicTangens:
-                    return NeuronFunctions.HyperbolicTangens;
-                case NeuronFunction.Sinusoida:
-                    return NeuronFunctions.Sinusoidal;
-                case NeuronFunction.Cosinusoidal:
-                    return NeuronFunctions.Cosinusoidal;
-                case NeuronFunction.Function001:
-                    return NeuronFunctions.Function001;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+
 
         private IEnumerable<TeachingVector> GetTeachingVectors(IEnumerable<ILearningSet> collection)
         {
