@@ -62,7 +62,13 @@ namespace NeuralNetorkResearch
         protected void TestNetwork(NetworkParameters parameters, NetworkStatistics statistic)
         {
             var network = new NeuralNetworkWraper();
-            network.TeachNetwork(parameters, statistic.Record);
+            try
+            {
+                network.TeachNetwork(parameters, statistic.Record);
+            }
+            catch
+            {
+            }
             var mistakes = TestNetworkAnswers(network);
             statistic.NetworkMistakes = mistakes;
         }

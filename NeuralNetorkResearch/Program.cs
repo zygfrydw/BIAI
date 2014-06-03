@@ -11,8 +11,15 @@ namespace NeuralNetorkResearch
     {
         static void Main(string[] args)
         {
-            var tester = new TestBeta(args[0], args[1], args[2]);
-            tester.Test();
+            if (args.Length > 2)
+            {
+                var tester = new TestBeta(args[0], args[1], args[2]);
+                tester.Test();
+            }
+            else
+            {
+                Console.WriteLine("Podaj parametry: zbiory testowe, zbiory testowe, katalog na dane");
+            }
         }
     }
 

@@ -93,6 +93,7 @@ namespace NeuralNetorkResearch
             }
             statFile.WriteLine("----; ----");
             statFile.WriteLine("NetworkMistakes; " + NetworkMistakes);
+            statFile.Close();
 
         }
     }
