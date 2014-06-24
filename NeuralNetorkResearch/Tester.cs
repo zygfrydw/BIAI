@@ -7,18 +7,21 @@ using NuralNetwork;
 
 namespace NeuralNetorkResearch
 {
-    internal abstract class Tester
+    public abstract class Tester
     {
         protected IEnumerable<ILearningSet> LearningSets;
         protected IEnumerable<ILearningSet> TestSets;
 
-        protected Tester(string learningSetPath, string testSetPath)
+        protected Tester(string learningSetPath, string testSetPath, string VerifySetPath)
         {
             TestSetPath = testSetPath;
             LearningSetPath = learningSetPath;
             LearningSets = GetLetterSet(LearningSetPath);
             TestSets = GetLetterSet(TestSetPath);
+            VerifySet = GetLetterSet(VerifySetPath);
         }
+
+        public IEnumerable<ILearningSet> VerifySet { get; set; }
 
         public string TestSetPath { get; private set; }
         public string LearningSetPath { get; private set; }
@@ -28,10 +31,11 @@ namespace NeuralNetorkResearch
             var parameters = new NetworkParameters();
             parameters.LearningSets = LearningSets;
             parameters.TestSet = TestSets;
-            parameters.Iterations = 20000;
+            parameters.MaxIterations= 1000;
             parameters.Alpha = 0.6;
             parameters.Eta = 0.2;
             parameters.Beta = 0.01;
+            parameters.NetworkError = 0.01;
             return parameters;
         }
 
@@ -59,26 +63,45 @@ namespace NeuralNetorkResearch
 
         public abstract void Test();
 
-        protected void TestNetwork(NetworkParameters parameters, NetworkStatistics statistic)
+        protected void TestNetwork(NetworkParameters parameters, INetworkStatistics statistic)
         {
             var network = new NeuralNetworkWraper();
             try
             {
                 network.TeachNetwork(parameters, statistic.Record);
             }
-            catch
+            catch(Exception exception)
             {
+                Console.WriteLine("Catch ex: " + exception.Message);
             }
-            var mistakes = TestNetworkAnswers(network);
-            statistic.NetworkMistakes = mistakes;
+            var mistakes = TestNetworkAnswers(network, TestSets);
+            statistic.TestSetLenght = TestSets.Sum(x => x.Letters.Count());
+            statistic.NetworkMistakesForTestSet = mistakes;
+
+            foreach (var set in VerifySet)
+            {
+                mistakes = TestNetworkAnswers(network, set);
+                var count = set.Letters.Count();
+                statistic.RecordVerify(set.Name, mistakes, count);
+            }
+            
+            
+            
         }
 
-        private int TestNetworkAnswers(NeuralNetworkWraper network)
+        private int TestNetworkAnswers(NeuralNetworkWraper network,  IEnumerable<ILearningSet> testSets)
         {
-            return (from letter in TestSets.SelectMany(x => x.Letters) 
+            return (from letter in testSets.SelectMany(x => x.Letters) 
                 let predictedLetter = network.CalculateOutput(letter.Image) 
                 where predictedLetter != letter.Name 
                 select letter).Count();
+        }
+        private int TestNetworkAnswers(NeuralNetworkWraper network, ILearningSet testSets)
+        {
+            return (from letter in testSets.Letters
+                    let predictedLetter = network.CalculateOutput(letter.Image)
+                    where predictedLetter != letter.Name
+                    select letter).Count();
         }
     }
 }

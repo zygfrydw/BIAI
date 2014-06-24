@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NuralNetwork;
+using System.Windows.Forms;
+
 
 namespace NeuralNetorkResearch
 {
@@ -11,15 +8,16 @@ namespace NeuralNetorkResearch
     {
         static void Main(string[] args)
         {
-            if (args.Length > 2)
-            {
-                var tester = new TestBeta(args[0], args[1], args[2]);
+            //if (args.Length > 2)
+            //{
+                var tester = new TestBeta(@"..\..\Data\Teach", @"..\..\Data\Test", @"..\..\Data\Verify", @"..\..\Data\Result");
                 tester.Test();
-            }
-            else
-            {
-                Console.WriteLine("Podaj parametry: zbiory testowe, zbiory testowe, katalog na dane");
-            }
+                System.Windows.Forms.Application.SetSuspendState(PowerState.Hibernate, true, true);
+            //}
+            //else
+            //{
+            //    Console.WriteLine("Podaj parametry: zbiory testowe, zbiory testowe, katalog na dane");
+            //}
         }
     }
 

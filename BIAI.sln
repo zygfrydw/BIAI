@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkTest", "NetworkTest\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralNetorkResearch", "NeuralNetorkResearch\NeuralNetorkResearch.csproj", "{D8F17429-4CBE-4CF3-B2FC-E7BCB8E5FA08}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateFonts", "ConsoleApplication1\GenerateFonts.csproj", "{00D8C068-3008-4E80-83DF-A2F602550118}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResultsInterpreter", "ResultsInterpreter\ResultsInterpreter.csproj", "{9A0ECC54-D8D7-4B37-B1E3-1AEBF331D643}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{D8F17429-4CBE-4CF3-B2FC-E7BCB8E5FA08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8F17429-4CBE-4CF3-B2FC-E7BCB8E5FA08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8F17429-4CBE-4CF3-B2FC-E7BCB8E5FA08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00D8C068-3008-4E80-83DF-A2F602550118}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00D8C068-3008-4E80-83DF-A2F602550118}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00D8C068-3008-4E80-83DF-A2F602550118}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00D8C068-3008-4E80-83DF-A2F602550118}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A0ECC54-D8D7-4B37-B1E3-1AEBF331D643}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A0ECC54-D8D7-4B37-B1E3-1AEBF331D643}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A0ECC54-D8D7-4B37-B1E3-1AEBF331D643}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A0ECC54-D8D7-4B37-B1E3-1AEBF331D643}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
